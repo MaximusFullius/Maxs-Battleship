@@ -25,6 +25,19 @@
                     <release>21</release>
                 </configuration>
             </plugin>
+            <!-- OpenRewrite plugin to run Java 21 migration recipes locally -->
+            <plugin>
+                <groupId>org.openrewrite.maven</groupId>
+                <artifactId>rewrite-maven-plugin</artifactId>
+                <version>5.47.3</version>
+                <configuration>
+                    <activeRecipes>
+                        <recipe>org.openrewrite.java.migrate.UpgradeToJava21</recipe>
+                    </activeRecipes>
+                    <recipeArtifactCoordinates>org.openrewrite.recipe:rewrite-migrate-java:2.31.1</recipeArtifactCoordinates>
+                    <failOnDryRunError>false</failOnDryRunError>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
