@@ -1,0 +1,251 @@
+public class Board {
+    private int nrows;
+    private int ncols;
+
+    private Cell[][] boardP1;
+    private Cell[][] boardP2;
+
+    private Boat[] boatArray;
+
+    private int turnCountP1;
+    private int turnCountP2;
+    private int turnCountTotal;
+
+    private int boatsRemainingP1;
+    private int boatsRemainingP2;
+
+    private int powerPointsRemainingP1;
+    private int powerPointsRemainingP2;
+
+
+    public Board(char difficulty, char mode){
+        this.turnCountP1 = 0;
+        this.turnCountP2 = 0;
+        this.turnCountTotal = 0;
+
+        mode = Character.toUpperCase(mode);
+
+        if (mode == 'S') // Single player. P1 variables only.
+        {
+            difficulty = Character.toUpperCase(difficulty);
+            switch(difficulty){
+                case 'I': // Intermediate. 6x6 board
+                    this.boatsRemainingP1 = 3;
+                    this.ncols = 6;
+                    this.nrows = 6;
+                    this.powerPointsRemainingP1 = 3;
+                    break;
+
+                case 'A': // Advanced. 9x9 board
+                    this.boatsRemainingP1 = 5;
+                    this.ncols = 9;
+                    this.nrows = 9;
+                    this.powerPointsRemainingP1 = 5;
+                    break;
+
+                default: // Default to Beginner ('B')
+                    this.boatsRemainingP1 = 1;
+                    this.ncols = 3;
+                    this.nrows = 3;
+                    this.powerPointsRemainingP1 = 1;
+                    break;
+            }
+            // Set up new board.
+            boardP1 = new Cell[this.nrows][this.ncols];
+
+            // Set up the boats
+            this.boardP1 = placeBoats(this.ncols, this.nrows);
+        }
+
+        else{
+            // Two players. P1 and P2 variables used. AI might be implemented.
+            if (mode == 'T') {
+                switch(difficulty){
+                    case 'B': // Beginner
+                        break;
+
+                    case 'I': // Intermediate
+                        break;
+
+                    case 'A':
+
+                        break;
+
+                    default: // Default to beginner
+                        break;
+                }
+            }
+            else{
+                System.out.println("ERROR: invalid input for singleplayer/multiplayer mode.");
+            }
+        }
+    }
+
+    public Cell[][] placeBoats(int rows, int cols){
+        int intNumBoats = 0;
+        int randX;
+        int randY;
+        // Always Assume the 2D array always has the same number of columns as rows.
+        Cell[][] cellBoard = new Cell[rows][cols]; // 2D cell array to be returned.
+
+        //int intLeftSideX = 0;
+        int intRightSideX = cols-1;
+        //int intTopSideY = 0;
+        int intBottomSideY = rows-1;
+
+        boolean bPositionFound = false;
+
+        int BoatLen = 0;
+        boolean[] oresult = new boolean[2];
+        int coin = 0;
+
+        if (rows == 3){
+            // If it's a 3x3 grid, then there is only one boat: One 2-cell Destroyer.
+            // Since we are only making one boat here, we don't need to check for overlapping ships.
+            intNumBoats = 1;
+            int DestFinalX = 0;
+            int DestFinalY = 0;
+            char cOri = 'h';
+
+            // Set up cell grid on cellBoard[][].
+            for (int a = 0; a < rows; a++){
+                for (int b = 0; b < cols; b++){
+                    cellBoard[a][b] = new Cell(a, b, '-'); // Create empty cell
+                }
+            }
+
+            // Set up the boat array.
+            this.boatArray = new Boat[1]; // Only one boat here.
+
+            while (bPositionFound == false){
+                randX = getRandomNumber(0, intRightSideX);
+                randY = getRandomNumber(0, intBottomSideY);
+
+                // Find a valid orientation for the boat at the random position, if possible.
+                oresult = OrientBoat("destroyer", randX, randY, 3);
+
+                if (oresult[0] == false && oresult[1] == false) {
+                    // If no valid orientation exists at the random position, pick a different random position.
+                    bPositionFound = false;
+                }
+                else{ // An orientation is possible. Now check for collisions with other boats (if there is more than 1)
+                    if (oresult[0] == true && oresult[1] == true){
+                        // This means both horizontal and vertical orientations would fit for the boat.
+                        // Flip a coin and start with a random orientation and see if it doesn't get collisions.
+                        // (since there is only one boat in this case, we don't need to check for collisions)
+                        bPositionFound = true;
+                        coin = getRandomNumber(0,1);
+                        if (coin == 0) { //Check horizontal first
+                            cOri = 'h';
+                        }
+                        else{ // coin == 1. Check vertical first
+                            cOri = 'v';
+                        }
+                    }
+                    else{
+                        if (oresult[0] == true){
+                            cOri = 'h';
+                        }
+                        else{
+                            if (oresult[1] == true){
+                                cOri = 'v';
+                            }
+                        }
+                        bPositionFound = true;
+                    }
+                }
+            }
+            // Now, set the boats up on the cellBoard[][]...
+
+        }
+        else{ // More than 3 rows
+            if (rows == 6){
+                // If it's a 6x6 grid, then there are three ships: One 2-cell Destroyer, one 3-cell Cruiser, and one 4-cell Battleship.
+                intNumBoats = 3;
+
+
+            }
+            else{
+                if (rows == 9){
+                    intNumBoats = 5;
+                    // One 2-cell Destroyer. two 3-cell Cruisers, one 4-cell Battleship and one 5-cell Carrier.
+
+                }
+                else{
+                    System.out.println("ERROR: Invalid input for board size in placeBoats.");
+                }
+            }
+        }
+    }
+
+    public boolean[] OrientBoat(String type, int x, int y, int size){
+        // Returns an array of two booleans indicating whether vert/horiz orientations are possible -
+        // -on the grid with the given boats and coordinates.
+        int BoatLen = 0;
+        boolean[] OriBools = new boolean[2];
+        OriBools[0] = true; // The value of OriBools[0] determines whether the horizontal orientation is possible.
+        OriBools[1] = true; // The value fo OriBools[1] determines whether the vertical orientation is possible.
+
+        switch(type){ // Assign length values for the different boats.
+            case "destroyer":
+                BoatLen = 2;
+                break;
+            case "cruiser":
+                BoatLen = 3;
+                break;
+            case "battleship":
+                BoatLen = 4;
+                break;
+            case "carrier":
+                BoatLen = 5;
+                break;
+        }
+
+        // The input for size has to be either 3 for a 3x3 grid, 6 for a 6x6 grid, or 9 for a 9x9 grid.
+
+        if(x+1 <= (size-BoatLen)){ // Check if the boat is on the right side, within the grid. If so, horiz is possible
+            OriBools[0] = true;
+        }
+        else{
+            OriBools[0] = false;
+        }
+
+        if (y+1 <= (size-BoatLen)){ // Check if the boat is on the bottom side.
+            OriBools[1] = true;
+        }
+        else{
+            OriBools[1] = false;
+        }
+
+        return OriBools;
+    }
+
+    public int getRandomNumber(int min, int max) {
+        // Returns a random number between min and max.
+        // Source: https://www.baeldung.com/java-generating-random-numbers-in-range
+
+        return (int)((Math.random() * (max - min)) + min);
+    }
+
+    public Boolean fire(int x, int y, int targetPlayer){
+
+    }
+
+    public String display(char player, boolean bShipsHidden){
+
+    }
+
+    public String print(String strPassword){
+
+    }
+
+    public String missile(int x, int y, int targetPlayer){
+
+    }
+
+    public String submarine(int x, int y, int targetPlayer){
+
+    }
+
+
+}
