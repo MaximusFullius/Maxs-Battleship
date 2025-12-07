@@ -710,6 +710,9 @@ public class Board {
                     colLetter = "G";
                     break;
                 case 8:
+                        colLetter = "H";
+                        break;
+                case 9:
                     colLetter = "I";
                     break;
             }
@@ -964,6 +967,9 @@ public class Board {
                         colLetter = "G";
                         break;
                     case 8:
+                        colLetter = "H";
+                        break;
+                    case 9:
                         colLetter = "I";
                         break;
                 }
