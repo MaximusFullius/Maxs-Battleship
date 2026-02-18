@@ -710,8 +710,8 @@ public class Board {
                     colLetter = "G";
                     break;
                 case 8:
-                        colLetter = "H";
-                        break;
+                    colLetter = "H";
+                    break;
                 case 9:
                     colLetter = "I";
                     break;
